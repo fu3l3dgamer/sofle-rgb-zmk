@@ -34,6 +34,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/event_manager.h>
 #include <zmk/events/activity_state_changed.h>
 #include <zmk/events/position_state_changed.h>
+#include <zmk/events/sensor_event.h>
 #include <zmk/pm.h>
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
 #include <zmk/usb.h>
@@ -80,6 +81,11 @@ static int activity_listener(const zmk_event_t *eh) {
 ZMK_LISTENER(codekeeb_sleep, activity_listener);
 ZMK_SUBSCRIPTION(codekeeb_sleep, zmk_position_state_changed);
 ZMK_SUBSCRIPTION(codekeeb_sleep, zmk_activity_state_changed);
+/* Encoder turns count as activity too, the same as in ZMK's own activity.c.
+ * Without this, scrolling with an encoder for longer than the timeout
+ * without pressing a key powered the half off mid-scroll. The peripheral
+ * raises these for its own encoder; the central also gets the peripheral's. */
+ZMK_SUBSCRIPTION(codekeeb_sleep, zmk_sensor_event);
 
 static void sleep_work_handler(struct k_work *work) {
     if (!cfg.enabled) {

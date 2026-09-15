@@ -135,6 +135,14 @@ static void layer_tint_set(uint8_t tint) {
 
 static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
+    /* A layer held on the other half should show here (the LOWER arrow
+     * cluster lives on this half) even if nobody has typed here lately.
+     * Going back to the base layer has nothing to show, so it doesn't
+     * wake an idle half. */
+    if (binding->param1 != 0) {
+        zmk_rgb_fx_wake();
+    }
+
     layer_tint_set(binding->param1);
     return ZMK_BEHAVIOR_OPAQUE;
 }

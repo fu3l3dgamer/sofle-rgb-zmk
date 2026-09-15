@@ -92,6 +92,18 @@ void zmk_interpolate_rgb(const struct zmk_color_rgb *from, const struct zmk_colo
 
 void zmk_rgb_fx_request_frames(uint32_t frames);
 
+/**
+ * @brief Show a change that didn't come from this half's own keys.
+ *
+ * An idle half renders nothing. Call this when something arrives from
+ * elsewhere (the other half, ZMK Studio) that should be visible anyway: an
+ * idle half wakes for one CONFIG_ZMK_IDLE_TIMEOUT window and then blanks
+ * again unless it saw its own activity in the meantime. A half that is
+ * already awake from an earlier wake gets a fresh window; a half that is
+ * awake from its own key presses is unaffected.
+ */
+void zmk_rgb_fx_wake(void);
+
 /* Global hue offset in degrees (0-359); see color.c. */
 extern uint16_t zmk_rgb_fx_hue_offset;
 

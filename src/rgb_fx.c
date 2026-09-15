@@ -20,6 +20,7 @@
 #include <drivers/ext_power.h>
 
 #include <zmk/rgb_fx.h>
+#include <zmk/activity.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/activity_state_changed.h>
 
@@ -72,6 +73,15 @@ static struct led_rgb px_buffer[DT_INST_PROP_LEN(0, pixels)];
  * Counter for effect animation frames that have been requested but have yet to be executed.
  */
 static uint32_t fx_timer_countdown = 0;
+
+/* Set while this half is IDLE or asleep: the strip is blanked and nothing
+ * renders. Frame requests are dropped, and a tick that was already queued
+ * when the half went idle does nothing. Without this, any request arriving
+ * while idle (a layer tint or RGB state relayed from the other half, a ZMK
+ * Studio change) rendered a frame, and the animated effects (gradient,
+ * sparkle) ask for their next frame from inside render_frame, so the strip
+ * came back on and kept animating until deep sleep. */
+static bool fx_suspended = false;
 
 /* Global speed: scales the animation tick period. Step 2 = 1x.
  * All effects advance per-frame, so changing the frame rate
@@ -131,6 +141,10 @@ uint8_t zmk_rgb_fx_get_pixel_distance(size_t pixel_idx, size_t other_pixel_idx) 
 
 static void zmk_rgb_fx_tick(struct k_work *work) {
     static uint32_t tick_count = 0;
+
+    if (fx_suspended) {
+        return;
+    }
 
     rgb_fx_render_frame(fx_root, &pixels[0], pixels_size);
 
@@ -206,7 +220,7 @@ static void zmk_rgb_fx_tick_handler(struct k_timer *timer) {
 K_TIMER_DEFINE(animation_tick, zmk_rgb_fx_tick_handler, NULL);
 
 void zmk_rgb_fx_request_frames(uint32_t frames) {
-    if (frames <= fx_timer_countdown) {
+    if (fx_suspended || frames <= fx_timer_countdown) {
         return;
     }
 
@@ -230,6 +244,52 @@ static void zmk_rgb_fx_blank(void) {
     }
 }
 
+/* Stop the effects and turn the strip off. Safe to call when already
+ * suspended. */
+static void zmk_rgb_fx_suspend(void) {
+    fx_suspended = true;
+    rgb_fx_stop(fx_root);
+    k_timer_stop(&animation_tick);
+    fx_timer_countdown = 0;
+    zmk_rgb_fx_blank();
+}
+
+/* Revive the effects. A no-op when not suspended, so a half that is already
+ * rendering doesn't restart its effect (which would jump the gradient phase). */
+static void zmk_rgb_fx_resume(void) {
+    if (!fx_suspended) {
+        return;
+    }
+
+    fx_suspended = false;
+    rgb_fx_start(fx_root);
+    zmk_rgb_fx_request_frames(1);
+}
+
+/* End of a wake window: blank again unless this half saw its own activity
+ * in the meantime (if it did, its next IDLE event blanks it instead). */
+static void zmk_rgb_fx_wake_expired(struct k_work *work) {
+    if (zmk_activity_get_state() != ZMK_ACTIVITY_ACTIVE) {
+        zmk_rgb_fx_suspend();
+    }
+}
+
+static K_WORK_DELAYABLE_DEFINE(fx_wake_work, zmk_rgb_fx_wake_expired);
+
+void zmk_rgb_fx_wake(void) {
+    if (!fx_suspended) {
+        /* Already awake. If that is only because of an earlier wake, a new
+         * change keeps it awake for another full window. */
+        if (k_work_delayable_is_pending(&fx_wake_work)) {
+            k_work_reschedule(&fx_wake_work, K_MSEC(CONFIG_ZMK_IDLE_TIMEOUT));
+        }
+        return;
+    }
+
+    zmk_rgb_fx_resume();
+    k_work_reschedule(&fx_wake_work, K_MSEC(CONFIG_ZMK_IDLE_TIMEOUT));
+}
+
 static int zmk_rgb_fx_on_activity_state_changed(const zmk_event_t *event) {
     const struct zmk_activity_state_changed *activity_state_event;
 
@@ -240,17 +300,13 @@ static int zmk_rgb_fx_on_activity_state_changed(const zmk_event_t *event) {
 
     switch (activity_state_event->state) {
     case ZMK_ACTIVITY_ACTIVE:
-        rgb_fx_start(fx_root);
-        zmk_rgb_fx_request_frames(1);
+        zmk_rgb_fx_resume();
         return 0;
     /* Auto-off: on IDLE (CONFIG_ZMK_IDLE_TIMEOUT idle) the effects stop
      * and the strip turns off; ACTIVE revives them. */
     case ZMK_ACTIVITY_IDLE:
     case ZMK_ACTIVITY_SLEEP:
-        rgb_fx_stop(fx_root);
-        k_timer_stop(&animation_tick);
-        fx_timer_countdown = 0;
-        zmk_rgb_fx_blank();
+        zmk_rgb_fx_suspend();
         return 0;
     default:
         return 0;

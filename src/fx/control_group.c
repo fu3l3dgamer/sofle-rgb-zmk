@@ -207,6 +207,10 @@ int zmk_rgb_fx_control_handle_command(const struct device *dev, uint8_t command,
     LOG_INF("fx ctrl: cmd=%d param=%d active=%d idx=%d brt=%d/%d", command, param, (int)data->active,
             (int)data->current_fx_idx, (int)data->brightness, (int)config->brightness_steps);
 
+    /* &rgbfx has global locality, so the other half runs it too. If that
+     * half is idle, the change has to wake it to be seen at all. */
+    zmk_rgb_fx_wake();
+
     switch (command) {
     case RGB_FX_CMD_TOGGLE:
         data->active = !data->active;
@@ -327,6 +331,10 @@ int zmk_rgb_fx_control_apply(const struct device *dev, const struct zmk_rgb_fx_s
 
     const struct fx_control_group_config *config = dev->config;
     struct fx_control_group_data *data = dev->data;
+
+    /* Studio traffic isn't key activity, so an idle keyboard would take
+     * the change without showing it. */
+    zmk_rgb_fx_wake();
 
     if (set->active >= 0) {
         data->active = !!set->active;
@@ -572,6 +580,8 @@ static int fx_sync_on_pressed(struct zmk_behavior_binding *binding,
 
     LOG_INF("rgbsync: active=%d idx=%d hue=%d speed=%d brt=%d", (int)active, (int)idx, (int)hue,
             (int)speed, (int)brightness);
+
+    zmk_rgb_fx_wake();
 
     data->active = active;
     data->brightness = brightness;

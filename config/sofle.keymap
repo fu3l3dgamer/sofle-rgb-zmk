@@ -178,13 +178,13 @@
 // TODO: Some binds are waiting for shifted keycode support.
 // ------------------------------------------------------------------------------------------------------------
 // |       | F1  | F2  |  F3  |  F4  |  F5  |                         |  F6  |   F7  |   F8  |  F9  |  F10  |  DEL  |
-// | `     | F11 | F12 |   €  | RGB  |modRGB|                         | PRTSC|       |   UP  |OLEDanim|   -   | BKSPC |
+// | `     | F11 | F12 |   €  | RGB  |modRGB|                         | PSCRN|       |   UP  |OLEDanim|   -   | BKSPC |
 // |       |     |  {  |   }  | hue- | hue+ |                         |      | LEFT  |  DOWN | RIGHT|   =   |   |   |
 // |       |ZMKSt|     |      | Bri- | Bri+ |WPMview |        |OLEDanim|     |       |       |      |   \   |       |
 //               |     |      |      |      |  SPACE |        | ENTER |      |       |       |      |
             bindings = <
 &trans     &kp F1         &kp F2       &kp F3       &kp F4                   &kp F5                                                         &kp F6     &kp F7     &kp F8           &kp F9     &kp F10    &kp DEL
-&kp GRAVE  &kp F11        &kp F12      &kp RA(E)    &rgbfx RGBFX_TOGGLE(0)   &rgbfx RGBFX_NEXT(0)                                           &kp PSCR   &trans     &kp UP           &oledanim  &kp MINUS  &kp BSPC
+&kp GRAVE  &kp F11        &kp F12      &kp RA(E)    &rgbfx RGBFX_TOGGLE(0)   &rgbfx RGBFX_NEXT(0)                                           &kp PSCRN  &trans     &kp UP           &oledanim  &kp MINUS  &kp BSPC
 &trans     &trans         &kp LBRC     &kp RBRC     &rgbfx RGBFX_HUE_DOWN(0) &rgbfx RGBFX_HUE_UP(0)                                         &trans     &kp LEFT   &kp DOWN         &kp RIGHT  &kp EQUAL  &kp PIPE
 &trans     &studio_unlock &trans       &trans       &rgbfx RGBFX_DIM(0)      &rgbfx RGBFX_BRIGHTEN(0)  &wpmview                  &oledanim  &trans     &trans     &trans           &trans     &kp BSLH   &trans
                           &trans       &trans       &trans                   &trans                    &trans                    &trans     &trans     &trans     &trans           &trans

@@ -152,13 +152,13 @@
 // |  TAB  |  Q  |  W  |  E   |  R   |  T   |                         |  Y   |  U    |  I    |  O   |   P   | BKSPC |
 // | SHIFT |  A  |  S  |  D   |  F   |  G   |                         |  H   |  J    |  K    |  L   |   ;   |   '   |
 // |  CTRL |  Z  |  X  |  C   |  V   |  B   |  MUTE  |        | PLAY  |  N   |  M    |  ,    |  .   |   /   | SHIFT |
-//               | GUI | ALT  | CTRL | LOWER|  SPACE |        | ENTER | RAISE| CTRL  | ALT   | GUI  |
+//               | CTRL| ALT  | GUI  | LOWER|  SPACE |        | ENTER | RAISE| GUI   | ALT   | CTRL |
             bindings = <
 &kp ESC   &kp N1 &kp N2   &kp N3   &kp N4    &kp N5                              &kp N6 &kp N7    &kp N8    &kp N9   &kp N0   &kp DEL
 &kp TAB   &kp Q  &kp W    &kp E    &kp R     &kp T                               &kp Y  &kp U     &kp I     &kp O    &kp P    &kp BSPC
 &kp LSHFT &kp A  &kp S    &kp D    &kp F     &kp G                               &kp H  &kp J     &kp K     &kp L    &kp SEMI &kp SQT
 &kp LCTRL &kp Z  &kp X    &kp C    &kp V     &kp B  &kp C_MUTE       &kp C_PLAY  &kp N  &kp M     &kp COMMA &kp DOT  &kp FSLH &kp RSHFT
-                 &kp LGUI &kp LALT &kp LCTRL &mo 1  &kp SPACE        &kp RET     &mo 2  &kp RCTRL &kp RALT  &kp RGUI
+                 &kp LCTRL &kp LALT &kp LGUI &mo 1  &kp SPACE        &kp RET     &mo 2  &kp RGUI  &kp RALT  &kp RCTRL
             >;
 
             // Right encoder: real mouse wheel, one HID tick per detent
@@ -178,14 +178,14 @@
 // TODO: Some binds are waiting for shifted keycode support.
 // ------------------------------------------------------------------------------------------------------------
 // |       | F1  | F2  |  F3  |  F4  |  F5  |                         |  F6  |   F7  |   F8  |  F9  |  F10  |  DEL  |
-// | `     | F11 | F12 |   €  | RGB  |modRGB|                         |      |       |   UP  |OLEDanim|       | BKSPC |
-// |       |     |  {  |   }  | hue- | hue+ |                         |      | LEFT  |  DOWN | RIGHT|       |   |   |
+// | `     | F11 | F12 |   €  | RGB  |modRGB|                         | PRTSC|       |   UP  |OLEDanim|   -   | BKSPC |
+// |       |     |  {  |   }  | hue- | hue+ |                         |      | LEFT  |  DOWN | RIGHT|   =   |   |   |
 // |       |ZMKSt|     |      | Bri- | Bri+ |WPMview |        |OLEDanim|     |       |       |      |   \   |       |
 //               |     |      |      |      |  SPACE |        | ENTER |      |       |       |      |
             bindings = <
 &trans     &kp F1         &kp F2       &kp F3       &kp F4                   &kp F5                                                         &kp F6     &kp F7     &kp F8           &kp F9     &kp F10    &kp DEL
-&kp GRAVE  &kp F11        &kp F12      &kp RA(E)    &rgbfx RGBFX_TOGGLE(0)   &rgbfx RGBFX_NEXT(0)                                           &trans     &trans     &kp UP           &oledanim  &trans     &kp BSPC
-&trans     &trans         &kp LBRC     &kp RBRC     &rgbfx RGBFX_HUE_DOWN(0) &rgbfx RGBFX_HUE_UP(0)                                         &trans     &kp LEFT   &kp DOWN         &kp RIGHT  &trans     &kp PIPE
+&kp GRAVE  &kp F11        &kp F12      &kp RA(E)    &rgbfx RGBFX_TOGGLE(0)   &rgbfx RGBFX_NEXT(0)                                           &kp PSCR   &trans     &kp UP           &oledanim  &kp MINUS  &kp BSPC
+&trans     &trans         &kp LBRC     &kp RBRC     &rgbfx RGBFX_HUE_DOWN(0) &rgbfx RGBFX_HUE_UP(0)                                         &trans     &kp LEFT   &kp DOWN         &kp RIGHT  &kp EQUAL  &kp PIPE
 &trans     &studio_unlock &trans       &trans       &rgbfx RGBFX_DIM(0)      &rgbfx RGBFX_BRIGHTEN(0)  &wpmview                  &oledanim  &trans     &trans     &trans           &trans     &kp BSLH   &trans
                           &trans       &trans       &trans                   &trans                    &trans                    &trans     &trans     &trans     &trans           &trans
             >;
